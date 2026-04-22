@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background: sky-blue rounded square -->
+  <rect width="512" height="512" rx="96" fill="#01579b"/>
+
+  <!-- Bird silhouette in white -->
+
+  <!-- Body (oval, slightly tilted) -->
+  <ellipse cx="236" cy="272" rx="92" ry="54" fill="white"/>
+
+  <!-- Head (circle, forward and up from body) -->
+  <circle cx="302" cy="222" r="52" fill="white"/>
+
+  <!-- Wing sweep — large arc curving back-left -->
+  <path d="M 224 258 C 188 226 130 212 60 234 C 108 226 174 242 212 264 Z" fill="white"/>
+
+  <!-- Lower secondary wing fold -->
+  <path d="M 218 272 C 175 292 126 285 84 272 C 130 274 177 272 212 276 Z" fill="#bbdefb"/>
+
+  <!-- Tail — forked, pointing left -->
+  <path d="M 160 272 C 132 258 106 264 82 276 C 108 268 138 268 158 278 Z" fill="white"/>
+
+  <!-- Beak — triangle pointing right -->
+  <path d="M 346 212 L 396 222 L 346 232 Z" fill="#bbdefb"/>
+
+  <!-- Eye -->
+  <circle cx="316" cy="216" r="13" fill="#01579b"/>
+  <circle cx="319" cy="213" r="5" fill="white"/>
+</svg>
