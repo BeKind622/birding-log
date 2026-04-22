@@ -104,25 +104,6 @@ export default function RecordDetail({ record }) {
         </div>
       )}
 
-      {record.orientation && (
-        <div className="detail-field">
-          <span className="detail-label">Bearing</span>
-          <span className="detail-value">
-            {record.orientation.heading != null
-              ? `${record.orientation.heading}° ${record.orientation.directionLabel}`
-              : '—'}
-            {' · '}
-            {record.orientation.tiltLabel}
-            {record.orientation.beta != null && (
-              <div style={{ fontSize: '0.72rem', color: '#666', marginTop: 2 }}>
-                β {record.orientation.beta}° / γ {record.orientation.gamma}°
-                {record.orientation.absolute ? ' (true north)' : ''}
-              </div>
-            )}
-          </span>
-        </div>
-      )}
-
       {record.notes ? (
         <div className="detail-field">
           <span className="detail-label">Notes</span>

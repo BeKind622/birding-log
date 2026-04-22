@@ -1,16 +1,13 @@
 import { useState, useRef } from 'react'
 import { useGeolocation } from '../hooks/useGeolocation.js'
-import { useSensors } from '../hooks/useSensors.js'
 import { useRecords } from '../context/RecordsContext.jsx'
 import { CATEGORIES } from '../utils/categories.js'
 import { compressPhoto } from '../utils/photos.js'
 import CategoryPicker from './CategoryPicker.jsx'
-import CompassRose from './CompassRose.jsx'
 
 export default function RecordForm({ onSave }) {
   const { addRecord } = useRecords()
   const { location, error: gpsError, loading: gpsLoading, getLocation } = useGeolocation()
-  const { compass, tilt, needsPermission, requestPermissions, getDirectionLabel, getTiltLabel } = useSensors()
 
   const [category, setCategory] = useState('')
   const [subcategory, setSubcategory] = useState('')
@@ -53,14 +50,6 @@ export default function RecordForm({ onSave }) {
       notes: notes.trim(),
       photos,
       location,
-      orientation: compass ? {
-        heading: compass.heading,
-        directionLabel: getDirectionLabel(compass.heading),
-        beta: compass.beta,
-        gamma: compass.gamma,
-        absolute: compass.absolute,
-        tiltLabel: getTiltLabel(tilt),
-      } : null,
     })
     setCategory('')
     setSubcategory('')
@@ -118,61 +107,6 @@ export default function RecordForm({ onSave }) {
             ? <><span className="spinner dark" />&nbsp;Locating…</>
             : location ? '🔄 Update GPS Location' : '📍 Capture GPS Location'}
         </button>
-      </div>
-
-      {/* Orientation */}
-      <div className="section-card">
-        <div className="section-title">Compass &amp; Orientation</div>
-        {needsPermission ? (
-          <div>
-            <p style={{ fontSize: '0.82rem', color: '#666', marginBottom: 10 }}>
-              Sensor access required for compass heading and camera tilt data.
-            </p>
-            <button className="btn btn-secondary btn-full" onClick={requestPermissions}>
-              🔒 Allow Compass &amp; Motion Access
-            </button>
-          </div>
-        ) : (
-          <div className="sensors-row">
-            <div className="compass-wrap" style={{ textAlign: 'center' }}>
-              <CompassRose heading={compass?.heading} size={90} />
-              <div style={{ fontSize: '0.75rem', color: '#666', marginTop: 4 }}>
-                {compass?.heading != null
-                  ? `${compass.heading}° ${getDirectionLabel(compass.heading)}`
-                  : 'No compass'}
-              </div>
-            </div>
-            <div className="sensor-info">
-              <div className="sensor-row">
-                <span>Heading</span>
-                <span className="sensor-val">
-                  {compass?.heading != null ? `${compass.heading}° ${getDirectionLabel(compass.heading)}` : '—'}
-                </span>
-              </div>
-              <div className="sensor-row">
-                <span>Tilt</span>
-                <span className="sensor-val">{getTiltLabel(tilt)}</span>
-              </div>
-              <div className="sensor-row">
-                <span>β / γ</span>
-                <span className="sensor-val">
-                  {compass?.beta != null ? `${compass.beta}° / ${compass.gamma}°` : '—'}
-                </span>
-              </div>
-              {tilt?.z != null && (
-                <div className="sensor-row">
-                  <span>Accel Z</span>
-                  <span className="sensor-val">{tilt.z} m/s²</span>
-                </div>
-              )}
-              {compass?.absolute && (
-                <div style={{ marginTop: 6, fontSize: '0.7rem', color: '#43a047' }}>
-                  ✓ True north (absolute)
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Photos */}
