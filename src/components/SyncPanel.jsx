@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useRecords } from '../context/RecordsContext.jsx'
 import { uploadRecords, downloadRecords } from '../utils/api.js'
 import { getCategoryConfig } from '../utils/categories.js'
 
-export default function SyncPanel() {
-  const { records, markSynced, mergeRecords, deleteRecord } = useRecords()
+export default function SyncPanel({ records, onMarkSynced, onMerge }) {
   const [online, setOnline] = useState(navigator.onLine)
   const [uploading, setUploading] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -22,14 +20,15 @@ export default function SyncPanel() {
   }, [])
 
   const unsynced = records.filter(r => !r.synced)
+  const synced   = records.filter(r =>  r.synced)
+  const hasPhotos = records.reduce((n, r) => n + (r.photos?.length || 0), 0)
 
   const handleUpload = async () => {
     if (!unsynced.length) return
-    setUploading(true)
-    setResult(null)
+    setUploading(true); setResult(null)
     try {
       const res = await uploadRecords(unsynced)
-      markSynced(unsynced.map(r => r.id))
+      onMarkSynced(unsynced.map(r => r.id))
       setResult({ ok: true, msg: `✓ Uploaded ${unsynced.length} record${unsynced.length !== 1 ? 's' : ''}. Server total: ${res.total}` })
     } catch (e) {
       setResult({ ok: false, msg: `Upload failed: ${e.message}` })
@@ -39,11 +38,10 @@ export default function SyncPanel() {
   }
 
   const handleDownload = async () => {
-    setDownloading(true)
-    setResult(null)
+    setDownloading(true); setResult(null)
     try {
       const serverRecords = await downloadRecords()
-      const added = mergeRecords(serverRecords)
+      const added = onMerge(serverRecords)
       setResult({ ok: true, msg: `✓ Server has ${serverRecords.length} record${serverRecords.length !== 1 ? 's' : ''}. ${added} new added locally.` })
     } catch (e) {
       setResult({ ok: false, msg: `Download failed: ${e.message}` })
@@ -52,12 +50,8 @@ export default function SyncPanel() {
     }
   }
 
-  const synced    = records.filter(r =>  r.synced)
-  const hasPhotos = records.reduce((n, r) => n + (r.photos?.length || 0), 0)
-
   return (
     <div className="sync-panel">
-      {/* Connection status */}
       <div className="sync-status-bar">
         <span className={online ? 'online-dot' : 'offline-dot'} />
         <span>{online ? 'Online' : 'Offline — saved locally'}</span>
@@ -66,7 +60,6 @@ export default function SyncPanel() {
         </span>
       </div>
 
-      {/* Stats */}
       <div className="section-card">
         <div className="section-title">Storage Summary</div>
         <div className="detail-field">
@@ -75,9 +68,7 @@ export default function SyncPanel() {
         </div>
         <div className="detail-field">
           <span className="detail-label">Synced</span>
-          <span className="detail-value" style={{ color: '#2e7d32' }}>
-            {synced.length}
-          </span>
+          <span className="detail-value" style={{ color: '#2e7d32' }}>{synced.length}</span>
         </div>
         <div className="detail-field">
           <span className="detail-label">Pending upload</span>
@@ -91,7 +82,6 @@ export default function SyncPanel() {
         </div>
       </div>
 
-      {/* Sync actions */}
       <div className="section-card">
         <div className="section-title">Server Sync</div>
         <div className="sync-actions">
@@ -120,28 +110,21 @@ export default function SyncPanel() {
           </p>
         )}
         {result && (
-          <div className={`sync-result ${result.ok ? 'success' : 'error'}`}>
-            {result.msg}
-          </div>
+          <div className={`sync-result ${result.ok ? 'success' : 'error'}`}>{result.msg}</div>
         )}
       </div>
 
-      {/* Breakdown by category */}
       {records.length > 0 && (
         <div className="section-card">
           <div className="section-title">Breakdown by Category</div>
           {Object.entries(
-            records.reduce((acc, r) => {
-              acc[r.category] = (acc[r.category] || 0) + 1
-              return acc
-            }, {})
+            records.reduce((acc, r) => { acc[r.category] = (acc[r.category] || 0) + 1; return acc }, {})
           ).map(([cat, count]) => {
             const cfg = getCategoryConfig(cat)
             return (
               <div key={cat} className="detail-field">
                 <span className="detail-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span>{cfg.icon}</span>
-                  <span>{cfg.label}</span>
+                  <span>{cfg.icon}</span><span>{cfg.label}</span>
                 </span>
                 <span className="detail-value">{count} record{count !== 1 ? 's' : ''}</span>
               </div>
@@ -149,10 +132,6 @@ export default function SyncPanel() {
           })}
         </div>
       )}
-
-      <div style={{ padding: '4px 4px 8px', fontSize: '0.75rem', color: '#aaa', lineHeight: 1.5 }}>
-        Sightings are stored on-device in localStorage and optionally synced to the server (localhost:3001). Run <code style={{ background: '#eee', padding: '1px 4px', borderRadius: 3 }}>npm start</code> to start both servers.
-      </div>
     </div>
   )
 }
